@@ -1,55 +1,123 @@
-public class StudentGradingSystem {
+// Buggy Java Code: Simple Banking System (with bugs)
+import java.util.Scanner;
+import java.util.ArrayList;
+import java.util.List;
 
+public class BankSystem {
     public static void main(String[] args) {
-        Student student = new Student("Alice", 102);
-        student.addGrade(95);
-        student.addGrade(87);
-        student.addGrade("A"); // Bug: wrong datatype
-        student.printAverage();
+        Bank bank = new Bank();
+        Scanner sc = new Scanner(System.in);
+        int choice = 0;
 
-        Student secondStudent = new Student("Bob"); // Bug: missing id argument
-        secondStudent.addGrade(65);
-        secondStudent.addGrade(75);
-        secondStudent.printAverage();
+        while (choice != 4) {
+            System.out.println("\n1. Create Account\n2. Deposit\n3. Withdraw\n4. Exit");
+            System.out.print("Enter choice: ");
+            choice = sc.nextInt();
 
-        student = null;
-        student.printAverage(); // Bug: NullPointerException
+            switch (choice) {
+                case 1:
+                    System.out.print("Enter account holder name: ");
+                    String name = sc.nextLine();
+                    bank.createAccount(name);
+                    break;
+                case 2:
+                    System.out.print("Enter account number: ");
+                    int accNum = sc.nextInt();
+                    System.out.print("Enter amount to deposit: ");
+                    double depAmt = sc.nextInt();
+                    bank.deposit(accNum, depAmt);
+                    break;
+                case 3:
+                    System.out.print("Enter account number: ");
+                    int accNumW = sc.nextInt();
+                    System.out.print("Enter amount to withdraw: ");
+                    double withAmt = sc.nextInt();
+                    bank.withdraw(accNumW, withAmt);
+                    break;
+                case 5:
+                    System.out.println("Exiting...");
+                    break;
+                default:
+                    System.out.println("Invalid option. Try again.");
+            }
+        }
+
+        sc.close();
     }
 }
 
-class Student {
-    private String name;
-    private int id;
-    private int[] grades;
-    private int gradeCount;
+class Bank {
+    List<Account> accounts;
 
-    public Student(String name, int id) {
-        this.name = name;
-        this.id = id;
-        this.grades = new int[5];
-        gradeCount = 0;
+    public Bank() {
+        accounts = new ArrayList<>();
     }
 
-    public void addGrade(int grade) {
-        if (gradeCount > grades.length) { // Bug: should be >= not >
-            System.out.println("Cannot add more grades");
-            return;
+    public void createAccount(String name) {
+        Account acc = new Account(name);
+        accounts.add(acc);
+        System.out.println("Account created! Account number: " + acc.getAccountNumber());
+    }
+
+    public void deposit(int accNum, double amount) {
+        Account acc = findAccount(accNum);
+        if (acc != null) {
+            acc.deposit = amount; // BUG: Should be acc.deposit(amount)
+            System.out.println("Deposited " + amount + " to account " + accNum);
+        } else {
+            System.out.println("Account not found.");
         }
-        grades[gradeCount] = grade;
-        gradeCount++;
     }
 
-    public void printAverage() {
-        int sum = 0;
-        for (int i = 0; i <= gradeCount; i++) { // Bug: should be i < gradeCount
-            sum += grades[i];
+    public void withdraw(int accNum, double amount) {
+        Account acc = findAccount(accNum);
+        if (acc != null) {
+            acc.withdraw(amount);
+            System.out.println("Withdrawn " + amount + " from account " + accNum);
+        } else {
+            System.out.println("Account not found.");
         }
-        double average = sum / gradeCount; // Bug: possible divide by zero
-        System.out.println("Average for " + name + ": " + average);
     }
 
-    public void Student(String name, int id) { // Bug: constructor wrongly defined as a method
-        this.name = name;
-        this.id = id;
+    private Account findAccount(int accNum) {
+        for (Account a : accounts) {
+            if (a.accountNumber == accNum) { // should use a.getAccountNumber()
+                return a;
+            }
+        }
+        return null;
     }
 }
+
+class Account {
+    private static int count = 1000;
+    public int accountNumber;
+    public String holderName;
+    public double balance;
+
+    public Account(String name) {
+        holderName = name;
+        accountNumber = count++;
+        balance = 0.0;
+    }
+
+    public int getAccountNumber() {
+        return accountNumber;
+    }
+
+    public void deposit(double amt) {
+        if (amt < 0) {
+            System.out.println("Negative deposit not allowed.");
+        } else
+            balance += amt;
+    }
+
+    public void withdraw(double amt) {
+        if (amt < 0 || amt > balance)
+            System.out.println("Invalid withdrawal.");
+        else
+            balance =- amt; // BUG: should be balance -= amt;
+    }
+}
+
+       
